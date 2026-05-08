@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randa's Lens - معرض رنده للفنون</title>
+    <style>
+        body { margin: 0; background-color: #050505; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
+        header { text-align: center; padding: 50px 20px; background: linear-gradient(to bottom, #111, #000); }
+        h1 { font-size: 3rem; letter-spacing: 5px; color: #fff; margin-bottom: 10px; text-transform: uppercase; }
+        .subtitle { color: #888; font-style: italic; font-size: 1.2rem; }
+
+        /* شبكة الصور */
+        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .photo-card { position: relative; overflow: hidden; border-radius: 15px; cursor: pointer; border: 1px solid #222; transition: transform 0.3s ease; }
+        .photo-card:hover { transform: scale(1.03); border-color: #fff; }
+        .photo-card img { width: 100%; height: 400px; object-fit: cover; display: block; filter: grayscale(30%); transition: filter 0.3s; }
+        .photo-card:hover img { filter: grayscale(0%); }
+
+        /* تأثير الفلاش */
+        #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 1000; }
+        .flash-animation { animation: cameraFlash 0.5s ease-out; }
+        @keyframes cameraFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+        /* تفاصيل الصورة */
+        .photo-info { position: absolute; bottom: 0; background: rgba(0,0,0,0.7); width: 100%; padding: 15px; box-sizing: border-box; transform: translateY(100%); transition: transform 0.3s; }
+        .photo-card:hover .photo-info { transform: translateY(0); }
+
+        footer { text-align: center; padding: 40px; color: #444; border-top: 1px solid #111; }
+    </style>
+</head>
+<body>
+
+    <div id="flash"></div>
+
+    <header>
+        <h1>RANDA'S LENS</h1>
+        <div class="subtitle">بِعُيون رنده.. حكايا لا تنتهي</div>
+    </header>
+
+    <div class="gallery">
+        <div class="photo-card" onclick="takeShot()">
+            <img src="photo1.jpg" alt="صورة من تصوير رنده">
+            <div class="photo-info">
+                <h3>حكاية من القدس</h3>
+                <p>تم التقاطها في أزقة البلدة القديمة</p>
+            </div>
+        </div>
+
+        <div class="photo-card" onclick="takeShot()">
+            <img src="photo2.jpg" alt="صورة من تصوير رنده">
+            <div class="photo-info">
+                <h3>سحر الطبيعة</h3>
+                <p>لحظة الغروب الساحرة</p>
+            </div>
+        </div>
+        
+        </div>
+
+    <footer>
+        <p>&copy; 2026 جميع الحقوق محفوظة للفنانة رنده</p>
+    </footer>
+
+    <script>
+        function takeShot() {
+            const flash = document.getElementById('flash');
+            flash.classList.remove('flash-animation');
+            void flash.offsetWidth; // ريسيت للأنيميشن
+            flash.classList.add('flash-animation');
+            
+            // صوت الكاميرا (اختياري إذا حابب نضيفه)
+            console.log("Flash! Photo Captured by Randa");
+        }
+    </script>
+</body>
+</html>
