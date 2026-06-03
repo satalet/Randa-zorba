@@ -1,76 +1,194 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Randa's Lens - معرض رنده للفنون</title>
-    <style>
-        body { margin: 0; background-color: #050505; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
-        header { text-align: center; padding: 50px 20px; background: linear-gradient(to bottom, #111, #000); }
-        h1 { font-size: 3rem; letter-spacing: 5px; color: #fff; margin-bottom: 10px; text-transform: uppercase; }
-        .subtitle { color: #888; font-style: italic; font-size: 1.2rem; }
+import tkinter as tk
+from tkinter import messagebox, ttk
 
-        /* شبكة الصور */
-        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
-        .photo-card { position: relative; overflow: hidden; border-radius: 15px; cursor: pointer; border: 1px solid #222; transition: transform 0.3s ease; }
-        .photo-card:hover { transform: scale(1.03); border-color: #fff; }
-        .photo-card img { width: 100%; height: 400px; object-fit: cover; display: block; filter: grayscale(30%); transition: filter 0.3s; }
-        .photo-card:hover img { filter: grayscale(0%); }
+# بيانات الأسئلة: السؤال، الخيارات، الإجابة الصحيحة، التلميح
+QUESTIONS = [
+    {
+        "q": "ما هو الشكل الاستعماري الذي يقوم على توقيع معاهدات تدعي فيها الدولة الاستعمارية الدفاع عن الدولة الأضعف مقابل السيطرة على قرارها؟",
+        "options": ["الاستيطان", "الاحتلال العسكري", "الحماية", "الانتداب"],
+        "answer": "الحماية",
+        "hint": "تلميح: فكري في المصطلح الذي يعني تقديم 'الدفاع والأمن' بموجب اتفاقية."
+    },
+    {
+        "q": "أي من الممرات المائية التالية يكتسب أهمية استراتيجية فائقة ويربط البحر الأبيض المتوسط بالبحر الأحمر؟",
+        "options": ["مضيق هرمز", "مضيق جبل طارق", "قناة السويس", "مضيق باب المندب"],
+        "answer": "قناة السويس",
+        "hint": "تلميح: ممر مائي اصطناعي يقع في مصر وكان سبباً رئيسياً للأطماع الاستعمارية."
+    },
+    {
+        "q": "من هو القائد العسكري الفرنسي الذي قاد الحملة الفرنسية على مصر وبلاد الشام عام 1798م؟",
+        "options": ["كليبر", "نابليون بونابرت", "القائد نيلسون", "مينو"],
+        "answer": "نابليون بونابرت",
+        "hint": "تلميح: أحد أشهر أباطرة وقادة فرنسا في التاريخ، وارتبط اسمه بمعركة عكا."
+    },
+    {
+        "q": "ما هو السبب الرئيسي المباشر لتوجيه فرنسا حملتها العسكرية نحو مصر عام 1798م؟",
+        "options": ["قطع طريق التجارة البريطانية نحو الهند", "مساعدة العثمانيين", "السيطرة على مناجم الذهب", "نشر الثقافة الأوروبية"],
+        "answer": "قطع طريق التجارة البريطانية نحو الهند",
+        "hint": "تلميح: فكري في الصراع الاستعماري الكبير بين فرنسا وبريطانيا ومستعمراتها في آسيا."
+    },
+    {
+        "q": "ما اسم المعركة البحرية التي دمر فيها الأسطول الإنجليزي سفن الحملة الفرنسية وحاصر الفرنسيين داخل مصر؟",
+        "options": ["معركة حطين", "معركة أبو قير البحرية", "معركة إمبابة", "معركة مرج دابق"],
+        "answer": "معركة أبو قير البحرية",
+        "hint": "تلميح: معركة بحرية هامة حدثت على شواطئ الإسكندرية."
+    },
+    {
+        "q": "فشلت الحملة الفرنسية في اقتحام مدينة فلسطينية صمدت أمام أسوارها. ما هي هذه المدينة؟",
+        "options": ["يافا", "غزة", "القدس", "عكا"],
+        "answer": "عكا",
+        "hint": "تلميح: مدينة ساحلية فلسطينية مشهورة بأسوارها العتيقة وقائدها أحمد باشا الجزار."
+    },
+    {
+        "q": "من هو القائد العثماني الذي تولى الدفاع عن مدينة عكا وحمايتها من حصار نابليون بونابرت؟",
+        "options": ["أحمد باشا الجزار", "محمد علي باشا", "عمر المختار", "الشريف حسين"],
+        "answer": "أحمد باشا الجزار",
+        "hint": "تلميح: لقب بـ 'الجزار' لشدته وحسمه في وجه الغزاة."
+    },
+    {
+        "q": "أي من العوامل التالية ساهم في إضعاف الجيش الفرنسي خلال حصاره لمدينة عكا بالتتابع مع بسالة المدافعين؟",
+        "options": ["انتشار مرض الطاعون", "نقص مياه النيل", "انضمام بريطانيا لنابليون", "الطقس المتجمد والثلوج"],
+        "answer": "انتشار مرض الطاعون",
+        "hint": "تلميح: مرض وبائي معدٍ خطير فتك بصفوف جنود نابليون."
+    },
+    {
+        "q": "ما هو الأثر الثقافي والعلمي الأبرز الذي تركه الفرنسيون خلفهم في مصر بعد انتهاء حملتهم؟",
+        "options": ["بناء الأهرامات", "اكتشاف حجر رشيد وفك الرموز", "تأسيس المدارس الكورية", "تعليم اللغة الإنجليزية"],
+        "answer": "اكتشاف حجر رشيد وفك الرموز",
+        "hint": "تلميح: قطعة أثرية ساعدت في قراءة وفهم الكتابة الهيروغليفية القديمة."
+    },
+    {
+        "q": "النظام الاستعماري الذي فرضته عصبة الأمم بعد الحرب العالمية الأولى بحجة قيادة الشعوب الضعيفة نحو الاستقلال يسمى بـ:",
+        "options": ["الانتداب", "الاستيطان", "الغزو الفكري", "التحالف العسكري"],
+        "answer": "الانتداب",
+        "hint": "تلميح: نظام طُبق مباشرة على فلسطين والأردن وسوريا بعد عام 1918م."
+    },
+    {
+        "q": "تعتبر مدينة القدس مطمعاً للدول الاستعمارية عبر التاريخ نتيجة لـ:",
+        "options": ["أهميتها الدينية والروحية العظيمة", "امتلاكها لأكبر حقول النفط", "صناعة السفن الحربية الفرنسية", "وجود مناجم الماس"],
+        "answer": "أهميتها الدينية والروحية العظيمة",
+        "hint": "تلميح: فكري في وجود المسجد الأقصى المبارك وكنيسة القيامة."
+    },
+    {
+        "q": "ما هي المعركة البرية التي خاضها المماليك في مصر ضد جيش نابليون وهُزموا فيها نتيجة لاعتمادهم على الأساليب التقليدية؟",
+        "options": ["معركة حطين", "معركة عين جالوت", "معركة إمبابة (الأهرام)", "معركة القادسية"],
+        "answer": "معركة إمبابة (الأهرام)",
+        "hint": "تلميح: معركة برية شهيرة جرت بالقرب من أهرامات الجيزة."
+    },
+    {
+        "q": "أي شكل من أشكال الاستعمار يهدف بشكل رئيسي ومباشر إلى تهجير السكان الأصليين وإحلال جماعات غريبة مكانهم؟",
+        "options": ["الاستعمار الاستيطاني", "الانتداب المؤقت", "المعاهدات التجارية", "الاستعمار الفكري"],
+        "answer": "الاستعمار الاستيطاني",
+        "hint": "تلميح: نوع الاستعمار الذي يمارسه الاحتلال الصهيوني في أرض فلسطين."
+    },
+    {
+        "q": "الدولة الاستعمارية الأوروبية التي اشتهرت بفرض سياسة 'الفرنسة' لطمس الهوية في المغرب العربي هي:",
+        "options": ["بريطانيا", "إيطاليا", "فرنسا", "إسبانيا"],
+        "answer": "فرنسا",
+        "hint": "تلميح: اسم السياسة (الفرنسة) مشتق من اسم الدولة نفسها."
+    },
+    {
+        "q": "ارتكب نابليون جريمة حرب بشعة بحق حامية مدينة فلسطينية بعد أن أعطاهم الأمان، مما جعل المدن الأخرى تستبسل. ما اسم المدينة؟",
+        "options": ["طولكرم", "يافا", "الخليل", "نابلس"],
+        "answer": "يافا",
+        "hint": "تلميح: مدينة ساحلية فلسطينية عريقة تشتهر ببرتقالها ومينائها القديم."
+    }
+]
 
-        /* تأثير الفلاش */
-        #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 1000; }
-        .flash-animation { animation: cameraFlash 0.5s ease-out; }
-        @keyframes cameraFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
-
-        /* تفاصيل الصورة */
-        .photo-info { position: absolute; bottom: 0; background: rgba(0,0,0,0.7); width: 100%; padding: 15px; box-sizing: border-box; transform: translateY(100%); transition: transform 0.3s; }
-        .photo-card:hover .photo-info { transform: translateY(0); }
-
-        footer { text-align: center; padding: 40px; color: #444; border-top: 1px solid #111; }
-    </style>
-</head>
-<body>
-
-    <div id="flash"></div>
-
-    <header>
-        <h1>RANDA'S LENS</h1>
-        <div class="subtitle">بِعُيون رنده.. حكايا لا تنتهي</div>
-    </header>
-
-    <div class="gallery">
-        <div class="photo-card" onclick="takeShot()">
-            <img src="photo1.jpg" alt="صورة من تصوير رنده">
-            <div class="photo-info">
-                <h3>حكاية من القدس</h3>
-                <p>تم التقاطها في أزقة البلدة القديمة</p>
-            </div>
-        </div>
-
-        <div class="photo-card" onclick="takeShot()">
-            <img src="photo2.jpg" alt="صورة من تصوير رنده">
-            <div class="photo-info">
-                <h3>سحر الطبيعة</h3>
-                <p>لحظة الغروب الساحرة</p>
-            </div>
-        </div>
+class QuizApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("امتحان الاجتماعيات التفاعلي - الصف الثامن")
+        self.root.geometry("650x500")
+        self.root.configure(bg="#f4f6f9")
         
-        </div>
-
-    <footer>
-        <p>&copy; 2026 جميع الحقوق محفوظة للفنانة رنده</p>
-    </footer>
-
-    <script>
-        function takeShot() {
-            const flash = document.getElementById('flash');
-            flash.classList.remove('flash-animation');
-            void flash.offsetWidth; // ريسيت للأنيميشن
-            flash.classList.add('flash-animation');
+        self.current_q = 0
+        self.score = 0
+        self.selected_ans = tk.StringVar()
+        
+        # العنوان الرئيسي
+        self.title_label = tk.Label(root, text="امتحان اجتماعيات تفاعلي - رنود البطلة ✨", font=("Arial", 16, "bold"), bg="#2c3e50", fg="white", pady=10)
+        self.title_label.pack(fill=tk.X)
+        
+        # إطار السؤال
+        self.q_frame = tk.Frame(root, bg="#f4f6f9", padx=20, pady=20)
+        self.q_frame.pack(fill=tk.BOTH, expand=True)
+        
+        self.q_label = tk.Label(self.q_frame, text="", font=("Arial", 13, "bold"), bg="#f4f6f9", fg="#333333", wraplength=550, justify="right")
+        self.q_label.pack(anchor="e", pady=10)
+        
+        # أزرار الخيارات
+        self.radio_buttons = []
+        for i in range(4):
+            rb = tk.Radiobutton(self.q_frame, text="", variable=self.selected_ans, value="", font=("Arial", 11), bg="#f4f6f9", fg="#222222", justify="right", anchor="e")
+            rb.pack(fill=tk.X, anchor="e", pady=5)
+            self.radio_buttons.append(rb)
             
-            // صوت الكاميرا (اختياري إذا حابب نضيفه)
-            console.log("Flash! Photo Captured by Randa");
-        }
-    </script>
-</body>
-</html>
+        # إطار الأزرار السفلية
+        self.btn_frame = tk.Frame(root, bg="#f4f6f9", pady=20)
+        self.btn_frame.pack(fill=tk.X)
+        
+        self.hint_btn = tk.Button(self.btn_frame, text="💡 بدي تلميح", font=("Arial", 11, "bold"), bg="#f39c12", fg="white", padx=10, command=self.show_hint)
+        self.hint_btn.pack(side=tk.LEFT, padx=30)
+        
+        self.next_btn = tk.Button(self.btn_frame, text="تحقق والتالي ⬅️", font=("Arial", 11, "bold"), bg="#27ae60", fg="white", padx=15, command=self.check_answer)
+        self.next_btn.pack(side=tk.RIGHT, padx=30)
+        
+        # شريط الحالة
+        self.status_label = tk.Label(root, text="", font=("Arial", 10), bg="#e2e8f0", fg="#555555", pady=5)
+        self.status_label.pack(fill=tk.X, side=tk.BOTTOM)
+        
+        self.load_question()
+
+    def load_question(self):
+        if self.current_q < len(QUESTIONS):
+            self.selected_ans.set("")
+            q_data = QUESTIONS[self.current_q]
+            
+            self.q_label.config(text=f"سؤال {self.current_q + 1}: {q_data['q']}")
+            self.status_label.config(text=f"التقدم: {self.current_q + 1} من {len(QUESTIONS)}")
+            
+            for i, option in enumerate(q_data["options"]):
+                self.radio_buttons[i].config(text=option, value=option)
+        else:
+            self.show_result()
+
+    def check_answer(self):
+        user_choice = self.selected_ans.get()
+        if not user_choice:
+            messagebox.showwarning("تنبيه", "يا رنود اختاري إجابة أولاً قبل الانتقال!")
+            return
+            
+        correct_ans = QUESTIONS[self.current_q]["answer"]
+        if user_choice == correct_ans:
+            self.score += 1
+            messagebox.showinfo("ممتازة! 🎉", "إجابة صحيحة، بطلة يا رنود!")
+        else:
+            messagebox.showerror("خطأ ❌", f"للأسف الإجابة غير صحيحة.\nالإجابة الصح هي: {correct_ans}")
+            
+        self.current_q += 1
+        self.load_question()
+
+    def show_hint(self):
+        hint_text = QUESTIONS[self.current_q]["hint"]
+        messagebox.showinfo("تلميح ذكي 💡", hint_text)
+
+    def show_result(self):
+        self.q_frame.pack_forget()
+        self.btn_frame.pack_forget()
+        
+        final_text = f"ما شاء الله خلصتي الامتحان يا رنود!\n\nعلامتك هي: {self.score} من {len(QUESTIONS)}\n\n"
+        if self.score >= 12:
+            final_text += "مستوى أسطوري! جاهزة للعلامة الكاملة بكره إن شاء الله 🏆⭐"
+        elif self.score >= 8:
+            final_text += "مستوى ممتاز، مراجعة سريعة للملخص الصبح وبتكوني توب! 👍"
+        else:
+            final_text += "بدها شوية تركيز، اقرأي ملخص أبو باسم الصبح وعيدي الاختبار وبتفجري الامتحان! 💪"
+            
+        result_label = tk.Label(self.root, text=final_text, font=("Arial", 14, "bold"), bg="#f4f6f9", fg="#2c3e50", pady=50, justify="center")
+        result_label.pack(fill=tk.BOTH, expand=True)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = QuizApp(root)
+    root.mainloop()
