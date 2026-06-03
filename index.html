@@ -1,194 +1,254 @@
-import tkinter as tk
-from tkinter import messagebox, ttk
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>امتحان الاجتماعيات التفاعلي - رنود البطلة ✨</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --bg: #f4f6f9;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .header {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        .section-box {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        .quiz-box { display: none; }
+        .quiz-box.active { display: block; }
+        .question { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: #222; }
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: right;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover { background-color: #f8fafc; border-color: #cbd5e1; }
+        .option-btn.correct { background-color: #d1fae5; border-color: var(--success); color: #065f46; }
+        .option-btn.wrong { background-color: #fee2e2; border-color: var(--danger); color: #991b1b; }
+        .actions { display: flex; justify-content: space-between; margin-top: 25px; }
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .btn-hint { background-color: var(--warning); color: white; }
+        .btn-next { background-color: var(--success); color: white; display: none; }
+        .hint-text {
+            background-color: #fef9c3;
+            border-right: 4px solid var(--warning);
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: 500;
+        }
+        .progress { color: #666; font-size: 0.9rem; margin-top: 10px; text-align: left; }
+        .result-card { text-align: center; padding: 40px 20px; display: none; }
+        .score { font-size: 3rem; font-weight: bold; color: var(--primary); margin: 20px 0; }
+        .start-btn {
+            background-color: var(--success); color: white; width: 100%; padding: 15px;
+            border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
 
-# بيانات الأسئلة: السؤال، الخيارات، الإجابة الصحيحة، التلميح
-QUESTIONS = [
-    {
-        "q": "ما هو الشكل الاستعماري الذي يقوم على توقيع معاهدات تدعي فيها الدولة الاستعمارية الدفاع عن الدولة الأضعف مقابل السيطرة على قرارها؟",
-        "options": ["الاستيطان", "الاحتلال العسكري", "الحماية", "الانتداب"],
-        "answer": "الحماية",
-        "hint": "تلميح: فكري في المصطلح الذي يعني تقديم 'الدفاع والأمن' بموجب اتفاقية."
-    },
-    {
-        "q": "أي من الممرات المائية التالية يكتسب أهمية استراتيجية فائقة ويربط البحر الأبيض المتوسط بالبحر الأحمر؟",
-        "options": ["مضيق هرمز", "مضيق جبل طارق", "قناة السويس", "مضيق باب المندب"],
-        "answer": "قناة السويس",
-        "hint": "تلميح: ممر مائي اصطناعي يقع في مصر وكان سبباً رئيسياً للأطماع الاستعمارية."
-    },
-    {
-        "q": "من هو القائد العسكري الفرنسي الذي قاد الحملة الفرنسية على مصر وبلاد الشام عام 1798م؟",
-        "options": ["كليبر", "نابليون بونابرت", "القائد نيلسون", "مينو"],
-        "answer": "نابليون بونابرت",
-        "hint": "تلميح: أحد أشهر أباطرة وقادة فرنسا في التاريخ، وارتبط اسمه بمعركة عكا."
-    },
-    {
-        "q": "ما هو السبب الرئيسي المباشر لتوجيه فرنسا حملتها العسكرية نحو مصر عام 1798م؟",
-        "options": ["قطع طريق التجارة البريطانية نحو الهند", "مساعدة العثمانيين", "السيطرة على مناجم الذهب", "نشر الثقافة الأوروبية"],
-        "answer": "قطع طريق التجارة البريطانية نحو الهند",
-        "hint": "تلميح: فكري في الصراع الاستعماري الكبير بين فرنسا وبريطانيا ومستعمراتها في آسيا."
-    },
-    {
-        "q": "ما اسم المعركة البحرية التي دمر فيها الأسطول الإنجليزي سفن الحملة الفرنسية وحاصر الفرنسيين داخل مصر؟",
-        "options": ["معركة حطين", "معركة أبو قير البحرية", "معركة إمبابة", "معركة مرج دابق"],
-        "answer": "معركة أبو قير البحرية",
-        "hint": "تلميح: معركة بحرية هامة حدثت على شواطئ الإسكندرية."
-    },
-    {
-        "q": "فشلت الحملة الفرنسية في اقتحام مدينة فلسطينية صمدت أمام أسوارها. ما هي هذه المدينة؟",
-        "options": ["يافا", "غزة", "القدس", "عكا"],
-        "answer": "عكا",
-        "hint": "تلميح: مدينة ساحلية فلسطينية مشهورة بأسوارها العتيقة وقائدها أحمد باشا الجزار."
-    },
-    {
-        "q": "من هو القائد العثماني الذي تولى الدفاع عن مدينة عكا وحمايتها من حصار نابليون بونابرت؟",
-        "options": ["أحمد باشا الجزار", "محمد علي باشا", "عمر المختار", "الشريف حسين"],
-        "answer": "أحمد باشا الجزار",
-        "hint": "تلميح: لقب بـ 'الجزار' لشدته وحسمه في وجه الغزاة."
-    },
-    {
-        "q": "أي من العوامل التالية ساهم في إضعاف الجيش الفرنسي خلال حصاره لمدينة عكا بالتتابع مع بسالة المدافعين؟",
-        "options": ["انتشار مرض الطاعون", "نقص مياه النيل", "انضمام بريطانيا لنابليون", "الطقس المتجمد والثلوج"],
-        "answer": "انتشار مرض الطاعون",
-        "hint": "تلميح: مرض وبائي معدٍ خطير فتك بصفوف جنود نابليون."
-    },
-    {
-        "q": "ما هو الأثر الثقافي والعلمي الأبرز الذي تركه الفرنسيون خلفهم في مصر بعد انتهاء حملتهم؟",
-        "options": ["بناء الأهرامات", "اكتشاف حجر رشيد وفك الرموز", "تأسيس المدارس الكورية", "تعليم اللغة الإنجليزية"],
-        "answer": "اكتشاف حجر رشيد وفك الرموز",
-        "hint": "تلميح: قطعة أثرية ساعدت في قراءة وفهم الكتابة الهيروغليفية القديمة."
-    },
-    {
-        "q": "النظام الاستعماري الذي فرضته عصبة الأمم بعد الحرب العالمية الأولى بحجة قيادة الشعوب الضعيفة نحو الاستقلال يسمى بـ:",
-        "options": ["الانتداب", "الاستيطان", "الغزو الفكري", "التحالف العسكري"],
-        "answer": "الانتداب",
-        "hint": "تلميح: نظام طُبق مباشرة على فلسطين والأردن وسوريا بعد عام 1918م."
-    },
-    {
-        "q": "تعتبر مدينة القدس مطمعاً للدول الاستعمارية عبر التاريخ نتيجة لـ:",
-        "options": ["أهميتها الدينية والروحية العظيمة", "امتلاكها لأكبر حقول النفط", "صناعة السفن الحربية الفرنسية", "وجود مناجم الماس"],
-        "answer": "أهميتها الدينية والروحية العظيمة",
-        "hint": "تلميح: فكري في وجود المسجد الأقصى المبارك وكنيسة القيامة."
-    },
-    {
-        "q": "ما هي المعركة البرية التي خاضها المماليك في مصر ضد جيش نابليون وهُزموا فيها نتيجة لاعتمادهم على الأساليب التقليدية؟",
-        "options": ["معركة حطين", "معركة عين جالوت", "معركة إمبابة (الأهرام)", "معركة القادسية"],
-        "answer": "معركة إمبابة (الأهرام)",
-        "hint": "تلميح: معركة برية شهيرة جرت بالقرب من أهرامات الجيزة."
-    },
-    {
-        "q": "أي شكل من أشكال الاستعمار يهدف بشكل رئيسي ومباشر إلى تهجير السكان الأصليين وإحلال جماعات غريبة مكانهم؟",
-        "options": ["الاستعمار الاستيطاني", "الانتداب المؤقت", "المعاهدات التجارية", "الاستعمار الفكري"],
-        "answer": "الاستعمار الاستيطاني",
-        "hint": "تلميح: نوع الاستعمار الذي يمارسه الاحتلال الصهيوني في أرض فلسطين."
-    },
-    {
-        "q": "الدولة الاستعمارية الأوروبية التي اشتهرت بفرض سياسة 'الفرنسة' لطمس الهوية في المغرب العربي هي:",
-        "options": ["بريطانيا", "إيطاليا", "فرنسا", "إسبانيا"],
-        "answer": "فرنسا",
-        "hint": "تلميح: اسم السياسة (الفرنسة) مشتق من اسم الدولة نفسها."
-    },
-    {
-        "q": "ارتكب نابليون جريمة حرب بشعة بحق حامية مدينة فلسطينية بعد أن أعطاهم الأمان، مما جعل المدن الأخرى تستبسل. ما اسم المدينة؟",
-        "options": ["طولكرم", "يافا", "الخليل", "نابلس"],
-        "answer": "يافا",
-        "hint": "تلميح: مدينة ساحلية فلسطينية عريقة تشتهر ببرتقالها ومينائها القديم."
-    }
-]
+    <div class="header">
+        <h1>امتحان الاجتماعيات التفاعلي 📚</h1>
+        <p>مخصص للبطلة رنود - الصف الثامن (الفصل الثاني)</p>
+    </div>
 
-class QuizApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("امتحان الاجتماعيات التفاعلي - الصف الثامن")
-        self.root.geometry("650x500")
-        self.root.configure(bg="#f4f6f9")
+    <div class="container">
         
-        self.current_q = 0
-        self.score = 0
-        self.selected_ans = tk.StringVar()
-        
-        # العنوان الرئيسي
-        self.title_label = tk.Label(root, text="امتحان اجتماعيات تفاعلي - رنود البطلة ✨", font=("Arial", 16, "bold"), bg="#2c3e50", fg="white", pady=10)
-        self.title_label.pack(fill=tk.X)
-        
-        # إطار السؤال
-        self.q_frame = tk.Frame(root, bg="#f4f6f9", padx=20, pady=20)
-        self.q_frame.pack(fill=tk.BOTH, expand=True)
-        
-        self.q_label = tk.Label(self.q_frame, text="", font=("Arial", 13, "bold"), bg="#f4f6f9", fg="#333333", wraplength=550, justify="right")
-        self.q_label.pack(anchor="e", pady=10)
-        
-        # أزرار الخيارات
-        self.radio_buttons = []
-        for i in range(4):
-            rb = tk.Radiobutton(self.q_frame, text="", variable=self.selected_ans, value="", font=("Arial", 11), bg="#f4f6f9", fg="#222222", justify="right", anchor="e")
-            rb.pack(fill=tk.X, anchor="e", pady=5)
-            self.radio_buttons.append(rb)
+        <!-- قسم الملخص الصباحي -->
+        <div id="summary-section" class="section-box">
+            <h2>📚 ملخص المراجعة السريع قبل الامتحان</h2>
+            <p><strong>الاستعمار والتنافس الأوروبي:</strong> سيطرة الدول القوية لنهب الثروات. أشكاله: احتلال عسكري (الجزائر)، انتداب (فلسطين بعد ح.ع.1)، حماية (الخليج العربي عبر المعاهدات)، استيطان (فلسطين الصهيونية).</p>
+            <p><strong>الحملة الفرنسية (1798):</strong> بقيادة نابليون لضرب تجارة بريطانيا للهند. انتصر في معركة إمبابة ودخل القاهرة. دُمر أسطوله في معركة أبو قير البحرية وبدأ حصار الفرنسيين بمصر.</p>
+            <p><strong>حملة الشام وفشل عكا:</strong> فشل نابليون عند أسوار عكا بسبب بسالة أهلها وقائدهم أحمد باشا الجزار، وقوة الأسوار، ومساعدة الأسطول الإنجليزي، وانتشار مرض الطاعون بين جنوده.</p>
+            <button class="start-btn" onclick="startQuiz()">جاهزة؟ خلينا نبدأ الامتحان الشامل (30 سؤال) 🚀</button>
+        </div>
+
+        <!-- قسم الكويز التفاعلي -->
+        <div id="quiz-section" class="section-box quiz-box">
+            <div class="progress" id="progress-text">سؤال 1 من 30</div>
+            <div class="question" id="question-text">جاري تحميل السؤال...</div>
+            <div id="options-container"></div>
             
-        # إطار الأزرار السفلية
-        self.btn_frame = tk.Frame(root, bg="#f4f6f9", pady=20)
-        self.btn_frame.pack(fill=tk.X)
-        
-        self.hint_btn = tk.Button(self.btn_frame, text="💡 بدي تلميح", font=("Arial", 11, "bold"), bg="#f39c12", fg="white", padx=10, command=self.show_hint)
-        self.hint_btn.pack(side=tk.LEFT, padx=30)
-        
-        self.next_btn = tk.Button(self.btn_frame, text="تحقق والتالي ⬅️", font=("Arial", 11, "bold"), bg="#27ae60", fg="white", padx=15, command=self.check_answer)
-        self.next_btn.pack(side=tk.RIGHT, padx=30)
-        
-        # شريط الحالة
-        self.status_label = tk.Label(root, text="", font=("Arial", 10), bg="#e2e8f0", fg="#555555", pady=5)
-        self.status_label.pack(fill=tk.X, side=tk.BOTTOM)
-        
-        self.load_question()
-
-    def load_question(self):
-        if self.current_q < len(QUESTIONS):
-            self.selected_ans.set("")
-            q_data = QUESTIONS[self.current_q]
+            <div class="hint-text" id="hint-box"></div>
             
-            self.q_label.config(text=f"سؤال {self.current_q + 1}: {q_data['q']}")
-            self.status_label.config(text=f"التقدم: {self.current_q + 1} من {len(QUESTIONS)}")
-            
-            for i, option in enumerate(q_data["options"]):
-                self.radio_buttons[i].config(text=option, value=option)
-        else:
-            self.show_result()
+            <div class="actions">
+                <button class="btn btn-hint" id="hint-btn" onclick="toggleHint()">💡 بدي تلميح</button>
+                <button class="btn btn-next" id="next-btn" onclick="nextQuestion()">السؤال التالي ⬅️</button>
+            </div>
+        </div>
 
-    def check_answer(self):
-        user_choice = self.selected_ans.get()
-        if not user_choice:
-            messagebox.showwarning("تنبيه", "يا رنود اختاري إجابة أولاً قبل الانتقال!")
-            return
-            
-        correct_ans = QUESTIONS[self.current_q]["answer"]
-        if user_choice == correct_ans:
-            self.score += 1
-            messagebox.showinfo("ممتازة! 🎉", "إجابة صحيحة، بطلة يا رنود!")
-        else:
-            messagebox.showerror("خطأ ❌", f"للأسف الإجابة غير صحيحة.\nالإجابة الصح هي: {correct_ans}")
-            
-        self.current_q += 1
-        self.load_question()
+        <!-- قسم النتيجة النهائية -->
+        <div id="result-section" class="section-box result-card">
+            <h2>🏆 النتيجة النهائية</h2>
+            <p>يعطيكِ ألف عافية يا رنود البطلة، خلصتِ التحدي الكبير!</p>
+            <div class="score" id="score-text">0 / 30</div>
+            <p id="feedback-text" style="font-size: 1.2rem; font-weight: bold; color: var(--secondary);"></p>
+            <button class="start-btn" style="background-color: var(--primary); margin-top:20px;" onclick="location.reload()">إعادة الاختبار 🔄</button>
+        </div>
 
-    def show_hint(self):
-        hint_text = QUESTIONS[self.current_q]["hint"]
-        messagebox.showinfo("تلميح ذكي 💡", hint_text)
+    </div>
 
-    def show_result(self):
-        self.q_frame.pack_forget()
-        self.btn_frame.pack_forget()
-        
-        final_text = f"ما شاء الله خلصتي الامتحان يا رنود!\n\nعلامتك هي: {self.score} من {len(QUESTIONS)}\n\n"
-        if self.score >= 12:
-            final_text += "مستوى أسطوري! جاهزة للعلامة الكاملة بكره إن شاء الله 🏆⭐"
-        elif self.score >= 8:
-            final_text += "مستوى ممتاز، مراجعة سريعة للملخص الصبح وبتكوني توب! 👍"
-        else:
-            final_text += "بدها شوية تركيز، اقرأي ملخص أبو باسم الصبح وعيدي الاختبار وبتفجري الامتحان! 💪"
+    <script>
+        const QUESTIONS = [
+            {q: "ما هو الشكل الاستعماري الذي يقوم على توقيع معاهدات تدعي فيها الدولة الاستعمارية الدفاع عن الدولة الأضعف مقابل السيطرة على قرارها؟", options: ["الاستيطان", "الاحتلال العسكري", "الحماية", "الانتداب"], answer: "الحماية", hint: "فكري في المصطلح الذي يعني تقديم 'الدفاع والأمن' بموجب اتفاقية."},
+            {q: "أي من الممرات المائية التالية يكتسب أهمية استراتيجية فائقة ويربط البحر الأبيض المتوسط بالبحر الأحمر؟", options: ["مضيق هرمز", "مضيق جبل طارق", "قناة السويس", "مضيق باب المندب"], answer: "قناة السويس", hint: "ممر مائي اصطناعي يقع في مصر وكان سبباً رئيسياً للأطماع الاستعمارية."},
+            {q: "من هو القائد العسكري الفرنسي الذي قاد الحملة الفرنسية على مصر وبلاد الشام عام 1798م؟", options: ["كليبر", "نابليون بونابرت", "القائد نيلسون", "مينو"], answer: "نابليون بونابرت", hint: "أحد أشهر أباطرة وقادة فرنسا في التاريخ، وارتبط اسمه بمعركة عكا."},
+            {q: "ما هو السبب الرئيسي المباشر لتوجيه فرنسا حملتها العسكرية نحو مصر عام 1798م؟", options: ["قطع طريق التجارة البريطانية نحو الهند", "مساعدة العثمانيين", "السيطرة على مناجم الذهب", "نشر الثقافة الأوروبية"], answer: "قطع طريق التجارة البريطانية نحو الهند", hint: "فكري في الصراع الاستعماري الكبير بين فرنسا وبريطانيا ومستعمراتها في آسيا."},
+            {q: "ما اسم المعركة البحرية التي دمر فيها الأسطول الإنجليزي سفن الحملة الفرنسية وحاصر الفرنسيين داخل مصر؟", options: ["معركة حطين", "معركة أبو قير البحرية", "معركة إمبابة", "معركة مرج دابق"], answer: "معركة أبو قير البحرية", hint: "معركة بحرية هامة حدثت على شواطئ الإسكندرية."},
+            {q: "فشلت الحملة الفرنسية في اقتحام مدينة فلسطينية صمدت أمام أسوارها. ما هي هذه المدينة؟", options: ["يافا", "غزة", "القدس", "عكا"], answer: "عكا", hint: "مدينة ساحلية فلسطينية مشهورة بأسوارها العتيقة وقائدها أحمد باشا الجزار."},
+            {q: "من هو القائد العثماني الذي تولى الدفاع عن مدينة عكا وحمايتها من حصار نابليون بونابرت؟", options: ["أحمد باشا الجزار", "محمد علي باشا", "عمر المختار", "الشريف حسين"], answer: "أحمد باشا الجزار", hint: "لقب بـ 'الجزار' لشدته وحسمه في وجه الغزاة."},
+            {q: "أي من العوامل التالية ساهم في إضعاف الجيش الفرنسي خلال حصاره لمدينة عكا بالتتابع مع بسالة المدافعين؟", options: ["انتشار مرض الطاعون", "نقص مياه النيل", "انضمام بريطانيا لنابليون", "الطقس المتجمد والثلوج"], answer: "انتشار مرض الطاعون", hint: "مرض وبائي معدٍ خطير فتك بصفوف جنود نابليون."},
+            {q: "ما هو الأثر الثقافي والعلمي الأبرز الذي تركه الفرنسيون خلفهم في مصر بعد انتهاء حملتهم؟", options: ["بناء الأهرامات", "اكتشاف حجر رشيد وفك الرموز", "تأسيس المدارس الحديثة", "تعليم اللغة الإنجليزية"], answer: "اكتشاف حجر رشيد وفك الرموز", hint: "قطعة أثرية ساعدت في قراءة وفهم الكتابة الهيروغليفية القديمة."},
+            {q: "النظام الاستعماري الذي فرضته عصبة الأمم بعد الحرب العالمية الأولى بحجة قيادة الشعوب الضعيفة نحو الاستقلال يسمى بـ:", options: ["الانتداب", "الاستيطان", "الغزو الفكري", "التحالف العسكري"], answer: "الانتداب", hint: "نظام طُبق مباشرة على فلسطين والأردن وسوريا بعد عام 1918م."},
+            {q: "تعتبر مدينة القدس مطمعاً للدول الاستعمارية عبر التاريخ نتيجة لـ:", options: ["أهميتها الدينية والروحية العظيمة", "امتلاكها لأكبر حقول النفط", "صناعة السفن الحربية الفرنسية", "وجود مناجم الماس"], answer: "أهميتها الدينية والروحية العظيمة", hint: "فكري في وجود المسجد الأقصى المبارك وكنيسة القيامة."},
+            {q: "ما هي المعركة البرية التي خاضها المماليك في مصر ضد جيش نابليون وهُزموا فيها نتيجة لاعتمادهم على الأساليب التقليدية؟", options: ["معركة حطين", "معركة عين جالوت", "معركة إمبابة (الأهرام)", "معركة القادسية"], answer: "معركة إمبابة (الأهرام)", hint: "معركة برية شهيرة جرت بالقرب من أهرامات الجيزة."},
+            {q: "أي شكل من أشكال الاستعمار يهدف بشكل رئيسي ومباشر إلى تهجير السكان الأصليين وإحلال جماعات غريبة مكانهم؟", options: ["الاستعمار الاستيطاني", "الانتداب المؤقت", "المعاهدات التجارية", "الاستعمار الفكري"], answer: "الاستعمار الاستيطاني", hint: "نوع الاستعمار الذي يمارسه الاحتلال الصهيوني في أرض فلسطين."},
+            {q: "الدولة الاستعمارية الأوروبية التي اشتهرت بفرض سياسة 'الفرنسة' لطمس الهوية في المغرب العربي هي:", options: ["بريطانيا", "إيطاليا", "فرنسا", "إسبانيا"], answer: "فرنسا", hint: "اسم السياسة (الفرنسة) مشتق من اسم الدولة نفسها."},
+            {q: "ارتكب نابليون جريمة حرب بشعة بحق حامية مدينة فلسطينية بعد أن أعطاهم الأمان، مما جعل المدن الأخرى تستبسل. ما اسم المدينة؟", options: ["طولكرم", "يافا", "الخليل", "نابلس"], answer: "يافا", hint: "مدينة ساحلية فلسطينية عريقة تشتهر ببرتقالها ومينائها القديم."},
             
-        result_label = tk.Label(self.root, text=final_text, font=("Arial", 14, "bold"), bg="#f4f6f9", fg="#2c3e50", pady=50, justify="center")
-        result_label.pack(fill=tk.BOTH, expand=True)
+            // الأسئلة الجديدة المضافة لتكملة الـ 30 سؤالاً
+            {q: "ما هي الدولتان الاستعماريتان اللتان قادتا حركة التنافس الاستعماري الشرس على الوطن العربي في القرنين الثامن عشر والتاسع عشر؟", options: ["روسيا وإيطاليا", "بريطانيا وفرنسا", "ألمانيا وإسبانيا", "البرتغال وهولندا"], answer: "بريطانيا وفرنسا", hint: "أكبر إمبراطوريتين استعماريتين في التاريخ الحديث."},
+            {q: "أي الممرات المائية العربية التالية يشرف على حركة خروج النفط من الخليج العربي إلى العالم وتنافس عليه الاستعمار؟", options: ["مضيق جبل طارق", "مضيق باب المندب", "مضيق هرمز", "قناة السويس"], answer: "مضيق هرمز", hint: "المضيق الذي يقع بين الخليج العربي وخليج عمان."},
+            {q: "فرضت بريطانيا سيطرتها العسكرية المباشرة على مصر عام 1882م، ما هو الشكل الاستعماري الذي تمثله هذه السيطرة؟", options: ["الانتداب", "الاحتلال العسكري", "الحماية", "الاستيطان"], answer: "الاحتلال العسكري", hint: "دخول الجيوش بشكل مباشر وقسري دون أي اتفاقيات قانونية."},
+            {q: "ما هي حجة الدول الأوروبية المستمرة للتدخل في شؤون الدول الضعيفة وتبرير الاستعمار؟", options: ["نشر الألعاب الرياضية", "حماية الأقليات والامتيازات الأجنبية", "تطوير الزراعة والصناعة", "مكافحة الفقر مجاناً"], answer: "حماية الأقليات والامتيازات الأجنبية", hint: "كانوا يتحججون دائماً بالدفاع عن رعاياهم أو المصالح الدينية والتعليمية داخل الدولة العثمانية."},
+            {q: "أي الدول العربية التالية عانت من أشرس أشكال الاستعمار الاستيطاني الفرنسي الذي استمر لأكثر من 130 عاماً؟", options: ["تونس", "مصر", "الجزائر", "العراق"], answer: "الجزائر", hint: "تُلقب ببلد المليون ونصف المليون شهيد."},
+            {q: "ما الهدف الاقتصادي الأساسي للدول الأوروبية من استعمار الوطن العربي؟", options: ["الحصول على المواد الخام وتصريف البضائع", "توزيع الأموال والمساعدات", "بناء المصانع لأهل البلاد", "تحسين دخل المواطن العربي"], answer: "الحصول على المواد الخام وتصريف البضائع", hint: "الاستعمار يبحث عن ثروات لبلده وأسواق تجارية تابعة له."},
+            {q: "تولى قيادة الحملة الفرنسية في مصر بعد مغادرة نابليون بونابرت سراً إلى فرنسا القائد العسكري:", options: ["مينو", "كليبر", "نيلسون", "ديبوي"], answer: "كليبر", hint: "قائد فرنسي شهير اغتيل لاحقاً على يد الطالب السوري سليمان الحلبي."},
+            {q: "نجح الأسطول البريطاني في مساعدة أهالي عكا المحاصرين من البحر بـ:", options: ["إرسال المؤن والذخائر للمدينة", "قصف مدينة القدس", "الانسحاب وترك الأهالي", "تسليم المدينة لنابليون"], answer: "إرسال المؤن والذخائر للمدينة", hint: "بريطانيا دعمت عكا لمنع نابليون من التوسع وتهديد مصالحها."},
+            {q: "من هو الطالب العربي البطل الذي قام باغتيال القائد الفرنسي كليبر في مصر عام 1800م؟", options: ["أحمد باشا الجزار", "سليمان الحلبي", "محمد كُريّم", "عمر المختار"], answer: "سليمان الحلبي", hint: "طالب شامي أزهري أتى من حلب للدفاع عن مصر."},
+            {q: "خرجت الحملة الفرنسية من مصر تماماً في عهد قائدها الثالث الذي أعلن إسلامه وتزوج من مصرية، وهو القائد:", options: ["نابليون", "كليبر", "مينو", "نيلسون"], answer: "مينو", hint: "تولى القيادة بعد مقتل كليبر واستسلمت الحملة في عهده عام 1801م."},
+            {q: "أي المعارك التالية تعتبر بداية المواجهة العسكرية المباشرة بين الحملة الفرنسية والمصريين في الإسكندرية بقيادة حاكمها؟", options: ["معركة إمبابة", "مقاومة محمد كُريّم في الإسكندرية", "معركة أبو قير", "معركة عين جالوت"], answer: "مقاومة محمد كُريّم في الإسكندرية", hint: "حاكم الإسكندرية البطل الذي رفض الاستسلام وقاوم حتى أُعدم رمياً بالرصاص."},
+            {q: "من الآثار السياسية الهامة للحملة الفرنسية على الوطن العربي أنها:", options: ["حلت السلام في المنطقة", "لفتت أنظار الدول الأوروبية لأهمية موقع مصر والشرق", "منحت مصر الاستقلال التام", "أنهت النفوذ البريطاني في الهند"], answer: "لفتت أنظار الدول الأوروبية لأهمية موقع مصر والشرق", hint: "بعد خروج فرنسا، بدأت بريطانيا تخطط بجدية لاحتلال مصر بسبب موقعها الاستراتيجي."},
+            {q: "تعتبر الثورة التكنولوجية والصناعية في أوروبا سبباً في دفع الدول للاستعمار بسبب حاجتها لـ:", options: ["الأيدي العاملة الرخيصة فقط", "مصادر الطاقة والمواد الخام لصناعاتها", "السياحة والاستجمام", "تصدير الأغذية والملابس مجاناً"], answer: "مصادر الطاقة والمواد الخام لصناعاتها", hint: "المصانع الأوروبية كانت بحاجة ماسة لثروات طبيعية ومعادن من الشرق لتستمر."},
+            {q: "عجز نابليون عن دخول عكا وقال كلمته الشهيرة 'تحطمت أحلامي عند أسوارك يا...'، فما هو السبب المعماري لصمودها؟", options: ["قربها من الصحراء", "قوة ومتانة أسوارها وحصانتها التاريخية", "بناء بيوتها من الخشب", "عدم وجود أبواب للمدينة"], answer: "قوة ومتانة أسوارها وحصانتها التاريخية", hint: "المدينة كانت محصنة بأسوار ضخمة وخنادق عجزت مدفعية نابليون عن اختراقها."},
+            {q: "ما هو الممر المائي العربي الذي يقع في جنوب البحر الأحمر ويربطه بخليج عدن وبحر العرب؟", options: ["مضيق جبل طارق", "مضيق هرمز", "مضيق باب المندب", "قناة السويس"], answer: "مضيق باب المندب", hint: "مضيق استراتيجي تشرف عليه اليمن وجيبوتي ويتحكم بمدخل البحر الأحمر الجنوبي."}
+        ];
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = QuizApp(root)
-    root.mainloop()
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let hasAnswered = false;
+
+        function startQuiz() {
+            document.getElementById('summary-section').style.display = 'none';
+            document.getElementById('quiz-section').classList.add('active');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            hasAnswered = false;
+            document.getElementById('hint-box').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
+            
+            let currentQuestion = QUESTIONS[currentQuestionIndex];
+            document.getElementById('progress-text').innerText = `سؤال ${currentQuestionIndex + 1} من ${QUESTIONS.length}`;
+            document.getElementById('question-text').innerText = currentQuestion.q;
+            
+            let optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            currentQuestion.options.forEach(option => {
+                let button = document.createElement('button');
+                button.className = 'option-btn';
+                button.innerText = option;
+                button.onclick = () => checkAnswer(button, option);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedButton, option) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+            
+            let correctAnswer = QUESTIONS[currentQuestionIndex].answer;
+            let buttons = document.querySelectorAll('.option-btn');
+            
+            buttons.forEach(btn => {
+                if (btn.innerText === correctAnswer) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            if (option === correctAnswer) {
+                score++;
+            } else {
+                selectedButton.classList.add('wrong');
+            }
+            
+            document.getElementById('next-btn').style.display = 'block';
+        }
+
+        function toggleHint() {
+            let hintBox = document.getElementById('hint-box');
+            hintBox.innerText = QUESTIONS[currentQuestionIndex].hint;
+            hintBox.style.display = hintBox.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < QUESTIONS.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-section').classList.remove('active');
+            let resultSection = document.getElementById('result-section');
+            resultSection.style.display = 'block';
+            
+            document.getElementById('score-text').innerText = `${score} من ${QUESTIONS.length}`;
+            
+            let feedback = '';
+            if (score >= 25) feedback = "مستوى أسطوري وعبقري! جاهزة للعلامة الكاملة بكره بدون نقاش 🏆⭐";
+            else if (score >= 18) feedback = "مستوى ممتاز جداً! مراجعة سريعة للملخص الصبح وبتكوني توب بالتأكيد! 👍";
+            else feedback = "بدها شوية تركيز يا رنود، اقرأي الملخص الصبح وعيدي الاختبار وبتفجري الامتحان! 💪";
+            
+            document.getElementById('feedback-text').innerText = feedback;
+        }
+    </script>
+</body>
+</html>
